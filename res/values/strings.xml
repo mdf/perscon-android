@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Personal Container</string>
+	<string name="perscon_stopped">Perscon Stopped</string>
+	<string name="perscon_started">Perscon Started</string>
+	<string name="perscon_label">Perscon</string>
+	<string name="perscon_connected">Perscon Connected</string>
+	<string name="perscon_disconnected">Perscon Disconnected</string>
+</resources>
