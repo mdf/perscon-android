@@ -1,6 +1,7 @@
 
 package horizon.perscon.db.cloud;
 
+import horizon.perscon.db.ApplicationImpl;
 import horizon.perscon.db.AttachmentImpl;
 import horizon.perscon.db.EventImpl;
 import horizon.perscon.db.PersonImpl;
@@ -19,6 +20,7 @@ import horizon.perscon.model.Thing;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpHost;
@@ -82,6 +84,7 @@ public class CloudClient extends Thread implements Runnable
 				this.config.isHttps() ? "https" : "http");
 		httpClient.getParams().setParameter("http.default-host", httpHost);
 		
+		
 		this.lock = new NotifyLock();
 	}
 		
@@ -93,14 +96,17 @@ public class CloudClient extends Thread implements Runnable
 			SharedPreferences settings = context.getSharedPreferences(SERVICE_NAME, 0);
 			SharedPreferences.Editor editor = settings.edit();
 			
-			//String userId = settings.getString(PREF_USERID, null);
+			String userId = settings.getString(PREF_USERID, null);
 			//String userId = "fbf6df379eb038f5e95477f9d1a86edae8872bdf";
-			String userId = null;
+			//String userId = null;
+			
+			boolean newUser = false;
 			
 	 		if(userId==null)
 			{
 				debug("no userId found, doing install");
-				
+			
+				newUser = true;
 				user = this.registerUser();
 	
 				editor.putString(PREF_USERID, user.getUid());
@@ -110,12 +116,15 @@ public class CloudClient extends Thread implements Runnable
 			}
 			else
 			{
+				debug("found local userId: " + userId);
 				user = this.getUserDetails(userId);
 			}
+
+	 		debug("userid:" + user.getUid());
 	
-			//String deviceId = settings.getString(PREF_DEVICEID, null);
+			String deviceId = settings.getString(PREF_DEVICEID, null);
 			//String deviceId = "93d3093b25778ab9c42d05f74d558e8093fbb0e5";
-			String deviceId = null;
+			//String deviceId = null;
 			
 			if(deviceId==null)
 			{
@@ -126,44 +135,20 @@ public class CloudClient extends Thread implements Runnable
 				
 				device = this.registerDevice(imei, "my phone");
 				
-				editor.putString(PREF_DEVICEID, user.getUid());
-				
-				debug("deviceid: " + device.getDeviceId());
+				editor.putString(PREF_DEVICEID, device.getDeviceId());
 			}
 			else
 			{
 				// TODO get devices from cloud
-				
+
+				debug("found local deviceId: " + deviceId);
 				device = new Device();
 				device.setDeviceId(deviceId);
 			}
+			
+			debug("deviceid: " + device.getDeviceId());
 	
 			editor.commit();
-		}
-		catch(RegistrationException e)
-		{
-			throw e;
-		}
-	}
-	
-	public void registerApp(String applicationId, String applicationName, String applicationVersion) throws RegistrationException
-	{
-		try
-		{
-			Application[] apps = this.getApplications();
-			
-			if(apps!=null)
-			{
-				for(int i=0;i<apps.length;i++)
-				{
-					if(applicationId.equals(apps[i].getAid()))
-					{
-						return;
-					}
-				}
-			}
-			
-			this.registerApplication(applicationId, applicationName, applicationVersion);
 		}
 		catch(RegistrationException e)
 		{
@@ -180,6 +165,16 @@ public class CloudClient extends Thread implements Runnable
 	
 	public void run()
 	{
+        try
+        {
+    		this.startup();
+        }
+        catch(RegistrationException e)
+        {
+        	error("error registering cloud client, running locally only", e);
+        	return;
+        }
+		
 		debug("cloud client running");
 		
 		this.running = true;
@@ -189,6 +184,31 @@ public class CloudClient extends Thread implements Runnable
 			lock.waitForNotification();
 		
 			UploadDB [] ups = UploadDB.getToUpload(database);
+			
+			// do applications first
+
+			for(int i=0; i<ups.length; i++)
+			{
+				try
+				{
+					if(ApplicationImpl.getTableName().equals(ups[i].getType()))
+					{
+						debug("upload app: " + i + " " + ups[i].getId() + " " + ups[i].getType() + " " + ups[i].getUploaded());
+						horizon.perscon.model.Application application = ApplicationImpl.retrieveUnique(database, ups[i].getId());
+						this.registerApplication(application);
+					}
+					
+					UploadDB.notifyUploaded(database, ups[i]);
+				}
+				catch(RegistrationException e)
+				{
+					error("app reg exception", e);
+				}
+				catch(SyncException e)
+				{
+					error("app sync exception", e);					
+				}
+			}
 			
 			for(int i=0; i<ups.length; i++)
 			{
@@ -343,7 +363,8 @@ public class CloudClient extends Thread implements Runnable
 		HttpPost post = new HttpPost();
 		HttpResponse response = null;
 
-		String path = paths.getRegisterUser();
+		String path = paths.getRegisterDevice()
+						.replace("<user-id>", this.user.getUid());
 
 		try
 		{
@@ -392,7 +413,7 @@ public class CloudClient extends Thread implements Runnable
 		return d;
 	}
 	
-	protected void registerApplication(String applicationId, String applicationName, String applicationVersion)
+	protected void registerApplication(horizon.perscon.model.Application application)
 	{
 		debug("trying to registerApplication");
 		
@@ -401,15 +422,15 @@ public class CloudClient extends Thread implements Runnable
 
 		String path = paths.getRegisterApplication()
 			.replace("<user-id>", user.getUid())
-			.replace("<application-id>", applicationId);
+			.replace("<application-id>", application.getApplicationId());
 
 		try
 		{
 			post.setURI(new URI(path));
 
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			pairs.add(new BasicNameValuePair("name", applicationName));
-			pairs.add(new BasicNameValuePair("version", applicationVersion));
+			pairs.add(new BasicNameValuePair("name", application.getName()));
+			pairs.add(new BasicNameValuePair("version", application.getVersion()));
 			post.setEntity(new UrlEncodedFormEntity(pairs));
 			
 			response = httpClient.execute(post);
@@ -428,6 +449,17 @@ public class CloudClient extends Thread implements Runnable
 			throw new RegistrationException("Unable to register application, server said "
 					+ response.getStatusLine().getReasonPhrase()
 					+ response.getStatusLine().getStatusCode());
+		}
+
+		try
+		{
+			String responseString = EntityUtils.toString(response.getEntity());
+			debug("app reg response: " + responseString);
+		}
+		catch(IOException e)
+		{
+			error("Unable to parse app reg response", e);
+			throw new RegistrationException(e);			
 		}
 	}
 	
@@ -451,7 +483,7 @@ public class CloudClient extends Thread implements Runnable
 			error("Unable to get user applications", e);
 			throw new RegistrationException(e);
 		}
-		  
+
 		if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 		{
 			debug("Unable to get user applications, server said "
@@ -473,8 +505,6 @@ public class CloudClient extends Thread implements Runnable
 			error("Unable to parse user applications json response", e);
 			throw new RegistrationException(e);			
 		}
-		
-
 	}
 	
 	protected void syncPlace(Place place)
@@ -489,6 +519,8 @@ public class CloudClient extends Thread implements Runnable
 			.replace("<device-id>", device.getDeviceId())
 			.replace("<place-id>", place.getId().toString());
 
+		debug(path);
+		
 		try
 		{
 			post.setURI(new URI(path));
@@ -506,13 +538,14 @@ public class CloudClient extends Thread implements Runnable
 			post.setEntity(new UrlEncodedFormEntity(pairs));
 			
 			response = httpClient.execute(post);
+					
 		}
 		catch(Exception e)
 		{
 			error("Unable to sync place", e);
 			throw new SyncException(e);
 		}
-		  
+				  
 		if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 		{
 			debug("Unable to sync place, server said "
@@ -536,6 +569,8 @@ public class CloudClient extends Thread implements Runnable
 			.replace("<device-id>", device.getDeviceId())
 			.replace("<person-id>", person.getId().toString());
 
+		debug(path);
+		
 		try
 		{
 			post.setURI(new URI(path));
@@ -578,6 +613,8 @@ public class CloudClient extends Thread implements Runnable
 			.replace("<user-id>", user.getUid())
 			.replace("<device-id>", device.getDeviceId())
 			.replace("<thing-id>", thing.getId().toString());
+		
+		debug(path);
 
 		try
 		{
@@ -668,6 +705,8 @@ public class CloudClient extends Thread implements Runnable
 			.replace("<device-id>", device.getDeviceId())
 			.replace("<event-id>", event.getId().toString());
 
+		debug(path);
+		
 		try
 		{
 			post.setURI(new URI(path));
@@ -675,7 +714,8 @@ public class CloudClient extends Thread implements Runnable
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();			
 			pairs.add(new BasicNameValuePair("aid", event.getApplicationId()));
 			pairs.add(new BasicNameValuePair("ts", ""+(((float)event.getTimestamp())/1000.0f)));
-			pairs.add(new BasicNameValuePair("action", event.getEventType().toString()));
+			
+			//pairs.add(new BasicNameValuePair("action", event.getEventType().toString()));
 			
 			if(event.getPerson()!=null)	
 				pairs.add(new BasicNameValuePair("person", event.getPerson().getId().toString()));			
@@ -688,7 +728,17 @@ public class CloudClient extends Thread implements Runnable
 			
 			if(event.getMeta()!=null)	
 				pairs.add(new BasicNameValuePair("meta", event.getMeta()));
-					
+			
+			if(event.getPrivacyMask()!=null)
+				pairs.add(new BasicNameValuePair("mask", Arrays.toString(event.getPrivacyMask().getMask())));
+			
+			/*
+			for(int i=0;i<pairs.size();i++)
+			{
+				debug("ev: " + pairs.get(i).getName() + " " + pairs.get(i).getValue().toString());
+			}
+			*/
+			
 			post.setEntity(new UrlEncodedFormEntity(pairs));
 			
 			response = httpClient.execute(post);

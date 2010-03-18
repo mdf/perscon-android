@@ -16,6 +16,7 @@ import horizon.perscon.model.Attachment;
 import horizon.perscon.model.Event;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
+import horizon.perscon.model.PrivacyMask;
 import horizon.perscon.model.Thing;
 import horizon.perscon.model.EventQuery;
 import horizon.perscon.model.Event.EventType;
@@ -44,31 +45,21 @@ public class PersconDB
 		
 		Configuration config = new Configuration();
 		
+		//config.setHttps(false);
+		//config.setPort(8080);
+		//config.setHost("192.168.0.149");
+		//config.setHost("128.243.35.10");
+		
 		config.setHttps(false);
-		config.setPort(8080);
-		config.setHost("192.168.0.149");
-		
-		//config.setHttps(true);
-		//config.setPort(80);
-		//config.setHost("1-test.latest.horizon-institute.appspot.com");
-		
+		config.setPort(80);
+		config.setHost("1-test.latest.horizon-institute.appspot.com");
+
 		cloudClient = new CloudClient(this.context, database, paths, config);
 	}
 	
 	public void start()
 	{		
 		// TODO retry failed registration
-		
-        try
-        {
-    		cloudClient.startup();
-        }
-        catch(RegistrationException e)
-        {
-        	error("error registering cloud client, running locally only", e);
-        	return;
-        }
-
 		cloudClient.start();
 	}
 	
@@ -88,215 +79,32 @@ public class PersconDB
 		}		
 	}
 	
-	public void runTests()
-	{
-
-		
-		
-		/*
-		Thing t = new Thing();
-		t.setFolder("folder");
-		t.setMeta("some meta");
-		t.setPermissions(1);
-		
-		Attachment a1 = new Attachment();
-		a1.setData("a1 data");
-		a1.setMeta("a1 meta");
-		a1.setPermissions(1);
-		
-		Attachment a2 = new Attachment();
-		a2.setData("a2 data");
-		a2.setMeta("a2 meta");
-		a2.setPermissions(2);
-		
-		t.setAttachments(new Attachment[] { a1, a2} );
-		
-		long l = ThingImpl.store(database, t);
-		
-		debug("l: " + t.getId());
-		
-		for(int i=0; i<t.getAttachments().length; i++)
-		{
-			debug("a" + i + ": " + t.getAttachments()[i].getId());
-		}
-		
-		Place p = new Place();
-		p.setElevation(12);
-		p.setLatitude(51.123);
-		p.setLongitude(-0.123);
-		p.setMeta("place meta");
-		p.setPermissions(2);
-
-		long l4 = PlaceImpl.store(database, p);
-		
-		debug("p: " + l4);
-		
-		Person pe = new Person();
-		pe.setPermissions(5);
-		pe.setMeta("person meta");
-		pe.setName("my name");
-		
-		long l5 = PersonImpl.store(database, pe);
-		debug("pe: " + l5);
-
-		*/
-		
-		debug("time: " + System.currentTimeMillis());
-
-		Thing t = new Thing();
-		t.setOrigin("test");
-		//t.setMeta("some meta");
-		t.setPermissions(1);
-		
-		Attachment a1 = new Attachment();
-		a1.setBody("a1 data".getBytes());
-		a1.setMimeType("text");
-		//a1.setMeta("a1 meta");
-		a1.setPermissions(1);
-		
-
-		/*
-		long l69 = AttachmentImpl.store(database, a1);
-		Attachment a6 = AttachmentImpl.retrieveUnique(database, l69);
-		String s1 = new String(a6.getBody());
-		debug("s: " + s1);
-		*/
-		
-		Attachment a2 = new Attachment();
-		a2.setBody("a2 data".getBytes());
-		a2.setMimeType("text");
-		//a2.setMeta("a2 meta");
-		a2.setPermissions(2);
-		
-		t.setAttachments(new Attachment[] { a1, a2} );
-
 	
-		Place p = new Place();
-		p.setElevation(12);
-		p.setLatitude(51.123);
-		p.setLongitude(-0.123);
-		//p.setMeta("place meta");
-		p.setPermissions(2);
-
-		Person pe = new Person();
-		pe.setPermissions(5);
-		//pe.setMeta("person meta");
-		pe.setName("my name");
-		
-		/*
-
-		Event e = new Event();
-		e.setEventType(Event.EventType.CREATED);
-		e.setTimestamp(System.currentTimeMillis());
-		
-		debug("ts: " + e.getTimestamp());
-		
-		e.setPermissions(59);
-		e.setApplicationId("app-2");
-		
-		e.setThing(t);
-		e.setPerson(pe);
-		e.setPlace(p);
-		
-		long l6 = EventImpl.store(database, e);
-		
-		debug("l6: " + l6);
-		Event e2 = EventImpl.retrieveUnique(database, l6);
-		debug("ts2: " + e2.getTimestamp());
-
-
-		Event e3 = new Event();
-		e3.setEventType(Event.EventType.CREATED);
-		e3.setTimestamp(System.currentTimeMillis());
-		e3.setThing(t);
-		long l7 = EventImpl.store(database, e3);
-		Event e4 = EventImpl.retrieveUnique(database, l7);
-		*/
-		/*
-		cc.syncThing(t);
-		cc.syncPlace(p);
-		cc.syncPerson(pe);
-		cc.syncAttachment(a1);
-		cc.syncAttachment(a2);
-		cc.syncEvent(e);
-		
-		*/		
-
-		
-		
-		/*
-		Attachment a1 = new Attachment();
-		a1.setData("a1 data");
-		a1.setMeta("a1 meta");
-		a1.setPermissions(1);
-		a1.setThingId(123l);
-		
-		long l69 = AttachmentImpl.store(database, a1);
-		
-		
-		Attachment a6 = AttachmentImpl.retrieveUnique(database, l69);
-		*/
-		
-		/*
-
-		EventQuery eq = new EventQuery();
-		eq.addConstraintNotNull("person");
-		eq.addConstraintNe("thing", new Long(1));
-		eq.addConstraintEq("eventType", EventType.CREATED.toString());
-		
-		EventImpl.match(database, eq);
-
-*/
-		
-		this.addEvent("app-2", pe, p, t);
+	public void registerApplication(String applicationId, String applicationName, String applicationVersion) throws RegistrationException
+	{
+		horizon.perscon.model.Application a = new horizon.perscon.model.Application();
+		a.setApplicationId(applicationId);
+		a.setName(applicationName);
+		a.setVersion(applicationVersion);
 		
 		try
 		{
-			Thread.sleep(5000);
-		}
-		catch(Exception e)
-		{
+			horizon.perscon.model.Application [] as = ApplicationImpl.retrieveByApplicationId(database, applicationId);
 			
-		}
-
-		this.addEvent("app-2", pe, p, t);
-		
-		debug("done tests");
-		
-		/*
-		UploadDB [] ups = UploadDB.getToUpload(database);
-		
-		for(int i=0; i<ups.length; i++)
-		{
-			debug("ups: " + i + " " + ups[i].getId() + " " + ups[i].getType() + " " + ups[i].getUploaded());
-			UploadDB.notifyUploaded(database, ups[i]);
-		}
-		
-		UploadDB [] ups2 = UploadDB.getToUpload(database);
-		
-		debug("done ups");
-		
-		for(int i=0; i<ups2.length; i++)
-		{
-			debug("ups2: " + i + " " + ups2[i].getId() + " " + ups2[i].getType() + " " + ups2[i].getUploaded());
-			UploadDB.notifyUploaded(database, ups2[i]);
-		}
-		debug("done ups2"); */
-		
-	}
-
-	public void registerApplication(String applicationId, String applicationName, String applicationVersion) throws RegistrationException
-	{
-		if(cloudClient!=null)
-		{
-			try
+			if(as!=null && as.length>0)
 			{
-				cloudClient.registerApp(applicationId, applicationName, applicationVersion);
+				debug("application " + applicationId + " already registered");
+				return;
 			}
-			catch(RegistrationException e)
-			{
-				throw e;
-			}
+			
+			ApplicationImpl.store(database, a);
+			cloudClient.notifyEvent();
+			
+			// TODO notify local callbacks
+		}
+		catch(StorageException e)
+		{
+			throw e;
 		}
 	}
 	
@@ -312,7 +120,7 @@ public class PersconDB
 		
 	}
 	
-	public Event addEvent(String applicationId, Person person, Place place, Thing thing) throws StorageException
+	public Event addEvent(String applicationId, Person person, Place place, Thing thing, PrivacyMask privacyMask) throws StorageException
 	{
 		Event event = new Event();
 		
@@ -376,6 +184,7 @@ public class PersconDB
 			PlaceImpl.createTable(database);
 			ThingImpl.createTable(database);
 			
+			ApplicationImpl.createTable(database);
 			UploadDB.createTable(database);
 		}
 
@@ -387,7 +196,8 @@ public class PersconDB
 			PersonImpl.recreateTable(database);
 			PlaceImpl.recreateTable(database);
 			ThingImpl.recreateTable(database);
-			
+
+			ApplicationImpl.createTable(database);
 			UploadDB.recreateTable(database);
 		}
 	}

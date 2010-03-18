@@ -38,6 +38,7 @@ public class Event implements Parcelable
 	
 	protected Long timestamp;
 	
+	protected PrivacyMask privacyMask;
 
 	public Long getId()
 	{
@@ -128,6 +129,16 @@ public class Event implements Parcelable
 	{
 		this.timestamp = timestamp;
 	}
+	
+	public PrivacyMask getPrivacyMask()
+	{
+		return privacyMask;
+	}
+
+	public void setPrivacyMask(PrivacyMask privacyMask)
+	{
+		this.privacyMask = privacyMask;
+	}
 
     public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>()
     {
@@ -161,6 +172,7 @@ public class Event implements Parcelable
 		out.writeParcelable(this.person, 0);
 		out.writeParcelable(this.place, 0);
 		out.writeParcelable(this.thing, 0);		
+		out.writeParcelable(this.privacyMask, 0);		
 	}
 
     public void readFromParcel(Parcel in)
@@ -173,8 +185,8 @@ public class Event implements Parcelable
     	this.timestamp = in.readLong();
     	this.person = in.readParcelable(null);
     	this.place = in.readParcelable(null);
-    	this.thing = in.readParcelable(null);    	
+    	this.thing = in.readParcelable(null);
+    	this.privacyMask = in.readParcelable(null);
     }
-
 
 }

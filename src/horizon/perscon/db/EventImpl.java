@@ -14,6 +14,7 @@ import horizon.perscon.model.EventQuery;
 import horizon.perscon.model.EventQueryConstraint;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
+import horizon.perscon.model.PrivacyMask;
 import horizon.perscon.model.Thing;
 
 import static horizon.perscon.Constants.*;
@@ -38,7 +39,18 @@ public class EventImpl extends Event
 			values.put("eventType", event.getEventType().toString());
 			values.put("timestamp", event.getTimestamp());
 			values.put("applicationId", event.getApplicationId());
-	
+
+			if(event.getPrivacyMask()!=null)
+			{
+				values.put("userPriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_USER)?1:0));
+				values.put("devPriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_DEVICE)?1:0));
+				values.put("tsPriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_TIMESTAMP)?1:0));
+				values.put("personPriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_PERSON)?1:0));
+				values.put("placePriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_PLACE)?1:0));
+				values.put("thingPriv", (int)(event.getPrivacyMask().getField(PrivacyMask.PRIV_THING)?1:0));
+				
+			}
+			
 			if(event.getPerson()!=null)
 			{
 				values.put("person", PersonImpl.store(database, event.getPerson()));
@@ -136,6 +148,13 @@ public class EventImpl extends Event
 				int thingIdColumn = c.getColumnIndex("thing");
 				int appIdColumn = c.getColumnIndex("applicationId");
 				
+				int userPrivColumn = c.getColumnIndex("userPriv");
+				int devPrivColumn = c.getColumnIndex("devPriv");
+				int tsPrivColumn = c.getColumnIndex("tsPriv");
+				int personPrivColumn = c.getColumnIndex("personPriv");
+				int placePrivColumn = c.getColumnIndex("placePriv");
+				int thingPrivColumn = c.getColumnIndex("thingPriv");
+				
 				Event [] es = new Event[c.getCount()];
 				int i=0;
 				
@@ -167,8 +186,17 @@ public class EventImpl extends Event
 						{
 							Thing t = ThingImpl.retrieveUnique(database, c.getLong(thingIdColumn));
 							es[i].setThing(t);
-						}			
-	
+						}
+						
+						PrivacyMask privacyMask = new PrivacyMask();
+						privacyMask.setField(PrivacyMask.PRIV_USER, c.getInt(userPrivColumn)!=0);
+						privacyMask.setField(PrivacyMask.PRIV_DEVICE, c.getInt(devPrivColumn)!=0);
+						privacyMask.setField(PrivacyMask.PRIV_TIMESTAMP, c.getInt(tsPrivColumn)!=0);
+						privacyMask.setField(PrivacyMask.PRIV_PERSON, c.getInt(personPrivColumn)!=0);
+						privacyMask.setField(PrivacyMask.PRIV_PLACE, c.getInt(placePrivColumn)!=0);
+						privacyMask.setField(PrivacyMask.PRIV_THING, c.getInt(thingPrivColumn)!=0);
+						es[i].setPrivacyMask(privacyMask);
+										
 						i++;
 					}
 					while(c.moveToNext());
@@ -206,7 +234,14 @@ public class EventImpl extends Event
 			int placeIdColumn = c.getColumnIndex("place");
 			int thingIdColumn = c.getColumnIndex("thing");
 			int appIdColumn = c.getColumnIndex("applicationId");
-			
+
+			int userPrivColumn = c.getColumnIndex("userPriv");
+			int devPrivColumn = c.getColumnIndex("devPriv");
+			int tsPrivColumn = c.getColumnIndex("tsPriv");
+			int personPrivColumn = c.getColumnIndex("personPriv");
+			int placePrivColumn = c.getColumnIndex("placePriv");
+			int thingPrivColumn = c.getColumnIndex("thingPriv");
+
 			if(c!=null)
 			{
 				if(c.moveToFirst())
@@ -235,7 +270,16 @@ public class EventImpl extends Event
 					{
 						Thing t = ThingImpl.retrieveUnique(database, c.getLong(thingIdColumn));
 						event.setThing(t);
-					}			
+					}
+					
+					PrivacyMask privacyMask = new PrivacyMask();
+					privacyMask.setField(PrivacyMask.PRIV_USER, c.getInt(userPrivColumn)!=0);
+					privacyMask.setField(PrivacyMask.PRIV_DEVICE, c.getInt(devPrivColumn)!=0);
+					privacyMask.setField(PrivacyMask.PRIV_TIMESTAMP, c.getInt(tsPrivColumn)!=0);
+					privacyMask.setField(PrivacyMask.PRIV_PERSON, c.getInt(personPrivColumn)!=0);
+					privacyMask.setField(PrivacyMask.PRIV_PLACE, c.getInt(placePrivColumn)!=0);
+					privacyMask.setField(PrivacyMask.PRIV_THING, c.getInt(thingPrivColumn)!=0);
+					event.setPrivacyMask(privacyMask);
 									
 					c.close();
 					
@@ -265,6 +309,12 @@ public class EventImpl extends Event
 		database.execSQL("CREATE TABLE " + TABLE_NAME
 				+ "(_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
 				+ "permissions INTEGER, "
+				+ "userPriv INTEGER, "
+				+ "devPriv INTEGER, "
+				+ "tsPriv INTEGER, "
+				+ "personPriv INTEGER, "
+				+ "placePriv INTEGER, "
+				+ "thingPriv INTEGER, "
 				+ "eventType TEXT, "
 				+ "meta TEXT, "
 				+ "applicationId TEXT, "

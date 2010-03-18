@@ -24,6 +24,7 @@ import horizon.perscon.model.Event;
 import horizon.perscon.model.EventQuery;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
+import horizon.perscon.model.PrivacyMask;
 import horizon.perscon.model.Thing;
 import horizon.perscon.model.Event.EventType;
 
@@ -34,6 +35,9 @@ public class TestActivity extends Activity
 	PersconDB pc = null;
 
     IPersconService myService = null;
+    
+    // TESTING
+    String appId = "e908b46e9d003ae4a857a54b38acafc57f78ab49";
     
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -76,7 +80,7 @@ public class TestActivity extends Activity
 		
 		try
 		{
-			this.myService.registerApplication("app-id1", "appname-1", "0.1");
+			this.myService.registerApplication(appId, "appname-1", "0.1");
 		}
 		catch(RemoteException e)
 		{
@@ -108,9 +112,14 @@ public class TestActivity extends Activity
 		person.setPermissions(5);
 		person.setName("my name");
 		
+		PrivacyMask pm = new PrivacyMask();
+		pm.setField(PrivacyMask.PRIV_PLACE, true);
+		pm.setAllPrivate();
+		pm.setAllPublic();
+		
 		try
 		{
-			Event e = this.myService.add("app-id1", person, place, thing);
+			Event e = this.myService.add(appId, person, place, thing, pm);
 			debug("eventid: " + e.getId());
 		}
 		catch(RemoteException e)

@@ -6,6 +6,7 @@ import horizon.perscon.IPersconServiceCallback;
 import horizon.perscon.model.Event;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
+import horizon.perscon.model.PrivacyMask;
 import horizon.perscon.model.Thing;
 
 import horizon.perscon.model.EventQuery;
@@ -20,5 +21,5 @@ interface IPersconService
 		
 	Event [] match(in EventQuery template);
 	
-	Event add(in String applicationId, in Person person, in Place place, in Thing thing);
+	Event add(in String applicationId, in Person person, in Place place, in Thing thing, in PrivacyMask privacyMask);
 }

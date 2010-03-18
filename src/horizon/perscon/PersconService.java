@@ -7,6 +7,7 @@ import horizon.perscon.model.Event;
 import horizon.perscon.model.EventQuery;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
+import horizon.perscon.model.PrivacyMask;
 import horizon.perscon.model.Thing;
 
 import android.app.Notification;
@@ -87,10 +88,10 @@ public class PersconService extends Service
             }			
 		}
 		
-		public Event add(String applicationId, Person person, Place place, Thing thing) throws RemoteException
+		public Event add(String applicationId, Person person, Place place, Thing thing, PrivacyMask privacyMask) throws RemoteException
 		{
 			// TODO errors
-			return perscon.addEvent(applicationId, person, place, thing);
+			return perscon.addEvent(applicationId, person, place, thing, privacyMask);
 		}
 
 		public Event[] match(EventQuery template) throws RemoteException
