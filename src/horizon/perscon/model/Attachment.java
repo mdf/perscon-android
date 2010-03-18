@@ -121,9 +121,6 @@ public class Attachment implements Parcelable
     	this.permissions = in.readInt();
     	this.meta = in.readString();
     	this.mimeType = in.readString();
-    	in.readByteArray(this.body);
+    	this.body = in.createByteArray();
     }
-
-
-
 }

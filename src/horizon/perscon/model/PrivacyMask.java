@@ -96,6 +96,6 @@ public class PrivacyMask implements Parcelable
 
     public void readFromParcel(Parcel in)
     {
-    	in.readBooleanArray(this.mask);
+    	this.mask = in.createBooleanArray();
     }		
 }
