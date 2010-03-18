@@ -17,11 +17,13 @@ import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
 import horizon.perscon.model.Thing;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -623,9 +625,28 @@ public class CloudClient extends Thread implements Runnable
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();			
 			pairs.add(new BasicNameValuePair("origin", thing.getOrigin()));
 			
-			if(thing.getMeta()!=null)	
-				pairs.add(new BasicNameValuePair("meta", thing.getMeta()));
+			if(thing.getMeta()!=null)
+			{
+				// HACK to get around parcelable size limit
+				try
+				{
+					Map<String,Object> metaData = mapper.readValue(thing.getMeta(), Map.class);
 					
+					if(metaData.containsKey("filename"))
+					{
+						String filename = (String)metaData.get("filename");
+						String base64file = Base64.encodeFromFile(filename);		
+						metaData.put("body", base64file);
+						
+						thing.setMeta(mapper.writeValueAsString(metaData));
+					}					
+				}
+				catch(Exception err)
+				{
+					error("error parsing meta json, dumping", err);
+				}
+				pairs.add(new BasicNameValuePair("meta", thing.getMeta()));
+			}		
 					
 			post.setEntity(new UrlEncodedFormEntity(pairs));
 			
