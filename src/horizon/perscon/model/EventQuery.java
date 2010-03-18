@@ -97,6 +97,6 @@ public class EventQuery implements Parcelable
 
     public void readFromParcel(Parcel in)
     {
-    	this.constraints = new Vector(Arrays.asList(in.readParcelableArray(null)));
+    	this.constraints = new Vector(Arrays.asList(in.readParcelableArray(this.getClass().getClassLoader())));
     }
 }

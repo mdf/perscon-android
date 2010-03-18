@@ -91,18 +91,43 @@ public class PersconService extends Service
 		public Event add(String applicationId, Person person, Place place, Thing thing, PrivacyMask privacyMask) throws RemoteException
 		{
 			// TODO errors
-			return perscon.addEvent(applicationId, person, place, thing, privacyMask);
+			try
+			{
+				return perscon.addEvent(applicationId, person, place, thing, privacyMask);				
+			}
+			catch(Exception e)
+			{
+				error("eventAdd error", e);
+			}
+			
+			throw new RemoteException();
 		}
 
 		public Event[] match(EventQuery template) throws RemoteException
 		{
 			// TODO errors
-			return perscon.matchEvents(template);
+			try
+			{
+				return perscon.matchEvents(template);
+			}
+			catch(Exception e)
+			{
+				error("match error", e);				
+			}
+			throw new RemoteException();
 		}
 
 		public void registerApplication(String applicationId, String applicationName, String applicationVersion) throws RemoteException
 		{
-			perscon.registerApplication(applicationId, applicationName, applicationVersion);
+			try
+			{
+				perscon.registerApplication(applicationId, applicationName, applicationVersion);
+			}
+			catch(Exception e)
+			{
+				error("registerApplication error", e);				
+			}
+			throw new RemoteException();
 		}
 	};
 	

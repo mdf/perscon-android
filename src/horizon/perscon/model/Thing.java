@@ -1,6 +1,9 @@
 
 package horizon.perscon.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -108,7 +111,10 @@ public class Thing implements Parcelable
     	this.permissions = in.readInt();
     	this.meta = in.readString();
     	this.origin = in.readString();
-    	this.attachments = (Attachment[]) in.readParcelableArray(null);
+    	
+    	List<Parcelable> ps = Arrays.asList(in.readParcelableArray(this.getClass().getClassLoader()));
+    	this.attachments = new Attachment[ps.size()];
+    	ps.toArray(this.attachments);
     }
 
 

@@ -169,6 +169,7 @@ public class Event implements Parcelable
 		out.writeString(this.applicationId);
 		out.writeString(this.eventType.toString());
 		out.writeLong(this.timestamp);
+		
 		out.writeParcelable(this.person, 0);
 		out.writeParcelable(this.place, 0);
 		out.writeParcelable(this.thing, 0);		
@@ -183,10 +184,11 @@ public class Event implements Parcelable
     	this.applicationId = in.readString();
     	this.eventType = EventType.valueOf(in.readString());
     	this.timestamp = in.readLong();
-    	this.person = in.readParcelable(null);
-    	this.place = in.readParcelable(null);
-    	this.thing = in.readParcelable(null);
-    	this.privacyMask = in.readParcelable(null);
+    	
+    	this.person = in.readParcelable(this.getClass().getClassLoader());
+    	this.place = in.readParcelable(this.getClass().getClassLoader());
+    	this.thing = in.readParcelable(this.getClass().getClassLoader());
+    	this.privacyMask = in.readParcelable(this.getClass().getClassLoader());
     }
 
 }
