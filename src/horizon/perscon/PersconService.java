@@ -98,7 +98,7 @@ public class PersconService extends Service
 			catch(Exception e)
 			{
 				error("eventAdd error", e);
-			}
+			} 
 			
 			throw new RemoteException();
 		}
@@ -125,9 +125,10 @@ public class PersconService extends Service
 			}
 			catch(Exception e)
 			{
-				error("registerApplication error", e);				
+				error("registerApplication error", e);
+				throw new RemoteException();
+				// ?
 			}
-			throw new RemoteException();
 		}
 	};
 	

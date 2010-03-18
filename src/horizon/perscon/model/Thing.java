@@ -8,7 +8,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Thing implements Parcelable
-{
+{ 
 	protected Long id;
 
 	protected Integer permissions;
@@ -106,16 +106,14 @@ public class Thing implements Parcelable
 	}
 
     public void readFromParcel(Parcel in)
-    {
+    {    	
     	this.id = in.readLong();
     	this.permissions = in.readInt();
     	this.meta = in.readString();
     	this.origin = in.readString();
     	
+    	// ?
     	List<Parcelable> ps = Arrays.asList(in.readParcelableArray(this.getClass().getClassLoader()));
-    	this.attachments = new Attachment[ps.size()];
-    	ps.toArray(this.attachments);
+		this.attachments = ps.toArray(new Attachment[ps.size()]);
     }
-
-
 }
