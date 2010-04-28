@@ -12,7 +12,6 @@ import horizon.perscon.db.cloud.DefaultPaths;
 import horizon.perscon.db.cloud.Paths;
 import horizon.perscon.db.cloud.RegistrationException;
 
-import horizon.perscon.model.Attachment;
 import horizon.perscon.model.Event;
 import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
@@ -52,7 +51,7 @@ public class PersconDB
 		
 		config.setHttps(false);
 		config.setPort(80);
-		config.setHost("1-test.latest.horizon-institute.appspot.com");
+		config.setHost("my-perscon.appspot.com");
 
 		cloudClient = new CloudClient(this.context, database, paths, config);
 	}

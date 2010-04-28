@@ -12,8 +12,10 @@ public class PrivacyMask implements Parcelable
 	public static final int PRIV_THING 			= 3;
 	public static final int PRIV_TIMESTAMP		= 4;
 	public static final int PRIV_USER 			= 5;
+	public static final int PRIV_UNKNOWN_1		= 6;
+	public static final int PRIV_UNKNOWN_2		= 7;
 
-	protected boolean mask [] = new boolean[6];
+	protected boolean mask [] = new boolean[8];
 	
 	public PrivacyMask()
 	{

@@ -1,11 +1,20 @@
 
 package horizon.perscon.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import horizon.android.logging.Logger;
+import horizon.perscon.IDataInputStream;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 
 public class Attachment implements Parcelable 
 {
+	private static Logger logger = Logger.getLogger(Attachment.class);
+	
 	protected Long id;
 
 	protected Integer permissions;
@@ -14,7 +23,7 @@ public class Attachment implements Parcelable
 	
 	protected String mimeType;
 	
-	protected byte [] body;
+	protected byte[] body;
 		
 	protected Long thingId;
    
@@ -112,7 +121,22 @@ public class Attachment implements Parcelable
 		out.writeInt(this.permissions);
 		out.writeString(this.meta);
 		out.writeString(this.mimeType);
-		out.writeByteArray(this.body);
+		out.writeStrongBinder(new IDataInputStream.Stub()
+		{
+			private final ByteArrayInputStream in = new ByteArrayInputStream(body);
+			public int read(byte[] buffer) throws RemoteException
+			{
+				try
+				{
+					return in.read(buffer);
+				}
+				catch(IOException e)
+				{
+					logger.error(e.getMessage(), e);
+					throw new RuntimeException();
+				}
+			}
+		});
 	}
 
     public void readFromParcel(Parcel in)
@@ -121,6 +145,20 @@ public class Attachment implements Parcelable
     	this.permissions = in.readInt();
     	this.meta = in.readString();
     	this.mimeType = in.readString();
-    	this.body = in.createByteArray();
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+		IDataInputStream data = IDataInputStream.Stub.asInterface(in.readStrongBinder());
+    	byte[] buffer = new byte[100];
+    	int read;
+    	try
+		{
+			while((read = data.read(buffer)) != -1)
+				out.write(buffer, 0, read);
+		} 
+    	catch(RemoteException e)
+		{
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException(e);
+		}
+		this.body = out.toByteArray();
     }
 }

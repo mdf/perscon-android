@@ -17,7 +17,6 @@ import horizon.perscon.model.Person;
 import horizon.perscon.model.Place;
 import horizon.perscon.model.Thing;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -102,13 +101,9 @@ public class CloudClient extends Thread implements Runnable
 			//String userId = "fbf6df379eb038f5e95477f9d1a86edae8872bdf";
 			//String userId = null;
 			
-			boolean newUser = false;
-			
 	 		if(userId==null)
 			{
 				debug("no userId found, doing install");
-			
-				newUser = true;
 				user = this.registerUser();
 	
 				editor.putString(PREF_USERID, user.getUid());
@@ -604,6 +599,7 @@ public class CloudClient extends Thread implements Runnable
 		}	
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void syncThing(Thing thing)
 	{
 		debug("trying to syncThing");

@@ -27,6 +27,7 @@ public class AttachmentImpl extends Attachment
 			ContentValues values = new ContentValues();
 			values.put("permissions", attachment.getPermissions());
 			values.put("meta", attachment.getMeta());
+			values.put("mime", attachment.getMimeType());
 			values.put("thingId", attachment.getThingId());
 			values.put("body", attachment.getBody());
 
@@ -54,7 +55,8 @@ public class AttachmentImpl extends Attachment
 			{
 				int idColumn = c.getColumnIndex("_ID");
 				int permColumn = c.getColumnIndex("permissions");
-				int metaColumn = c.getColumnIndex("meta");		
+				int metaColumn = c.getColumnIndex("meta");	
+				int mimeColumn = c.getColumnIndex("mime");
 				int thingIdColumn = c.getColumnIndex("thingId");
 				int bodyColumn = c.getColumnIndex("body");
 				
@@ -69,6 +71,7 @@ public class AttachmentImpl extends Attachment
 						as[i].setId(c.getLong(idColumn));
 						as[i].setPermissions(c.getInt(permColumn));
 						as[i].setMeta(c.getString(metaColumn));
+						as[i].setMimeType(c.getString(mimeColumn));
 						as[i].setThingId(c.getLong(thingIdColumn));
 						as[i].setBody(c.getBlob(bodyColumn));		
 						
@@ -99,7 +102,8 @@ public class AttachmentImpl extends Attachment
 	
 			int idColumn = c.getColumnIndex("_ID");
 			int permColumn = c.getColumnIndex("permissions");
-			int metaColumn = c.getColumnIndex("meta");		
+			int metaColumn = c.getColumnIndex("meta");
+			int mimeColumn = c.getColumnIndex("mime");
 			int thingIdColumn = c.getColumnIndex("thingId");
 			int bodyColumn = c.getColumnIndex("body");
 	
@@ -111,6 +115,7 @@ public class AttachmentImpl extends Attachment
 					a.setId(c.getLong(idColumn));
 					a.setPermissions(c.getInt(permColumn));
 					a.setMeta(c.getString(metaColumn));
+					a.setMimeType(c.getString(mimeColumn));
 					a.setThingId(c.getLong(thingIdColumn));
 					a.setBody(c.getBlob(bodyColumn));
 					
@@ -138,6 +143,7 @@ public class AttachmentImpl extends Attachment
 				+ "(_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
 				+ "permissions INTEGER, "
 				+ "meta TEXT,"
+				+ "mime TEXT,"
 				+ "thingId BIGINT,"
 				+ "body BLOB);");
 	}

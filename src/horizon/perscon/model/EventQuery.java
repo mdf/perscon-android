@@ -95,7 +95,8 @@ public class EventQuery implements Parcelable
 		out.writeParcelableArray(constraints.toArray(new EventQueryConstraint[constraints.size()]), 0);
 	}
 
-    public void readFromParcel(Parcel in)
+    @SuppressWarnings("unchecked")
+	public void readFromParcel(Parcel in)
     {
     	this.constraints = new Vector(Arrays.asList(in.readParcelableArray(this.getClass().getClassLoader())));
     }

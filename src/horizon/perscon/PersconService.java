@@ -90,7 +90,7 @@ public class PersconService extends Service
 		
 		public Event add(String applicationId, Person person, Place place, Thing thing, PrivacyMask privacyMask) throws RemoteException
 		{
-			// TODO errors
+			// TODO errors, callbacks
 			try
 			{
 				return perscon.addEvent(applicationId, person, place, thing, privacyMask);				
