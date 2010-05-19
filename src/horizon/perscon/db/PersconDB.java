@@ -51,7 +51,8 @@ public class PersconDB
 		
 		config.setHttps(false);
 		config.setPort(80);
-		config.setHost("my-perscon.appspot.com");
+		//config.setHost("my-perscon.appspot.com");
+		config.setHost("horizon-institute.appspot.com");
 
 		cloudClient = new CloudClient(this.context, database, paths, config);
 	}
